@@ -8,6 +8,16 @@
       "allowedRoles": ["authenticated"]
     },
     {
+      "route": "/login",
+      "serve": "/.auth/login/github",
+      "allowedRoles": ["anonymous"]
+    },
+    {
+      "route": "/logout",
+      "serve": "/.auth/logout",
+      "allowedRoles": ["authenticated"]
+    },
+    {
       "route": "/*",
       "serve": "/index.html",
       "statusCode": 200

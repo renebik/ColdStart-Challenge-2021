@@ -36,5 +36,8 @@ export default {
       </div>
       <p class="description">{{ description }}</p>
     </div>
+    <div class="buttons" v-if="user">
+      <ButtonFooter v-if="user" @clicked="placeOrder" label="Place Order" />
+    </div>
   </div>
 </template>
