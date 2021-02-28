@@ -1,7 +1,11 @@
 <script>
 import ButtonFooter from '@/components/button-footer.vue';
+
 export default {
   name: 'CardContent',
+  components: {
+    ButtonFooter,
+  },
   props: {
     id: {
       type: String,
