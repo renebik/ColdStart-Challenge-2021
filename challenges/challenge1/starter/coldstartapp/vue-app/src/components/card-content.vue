@@ -1,4 +1,5 @@
 <script>
+import ButtonFooter from '@/components/button-footer.vue';
 export default {
   name: 'CardContent',
   props: {
