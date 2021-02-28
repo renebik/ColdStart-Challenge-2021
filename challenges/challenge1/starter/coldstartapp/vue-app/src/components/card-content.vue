@@ -1,5 +1,6 @@
 <script>
 import ButtonFooter from '@/components/button-footer.vue';
+import getUserInfo from '../assets/js/userInfo';
 
 export default {
   name: 'CardContent',
@@ -23,6 +24,9 @@ export default {
       type: String,
       default: () => '',
     },
+  },
+  async created() {
+    this.user = await getUserInfo();
   },
   methods: {
   },
