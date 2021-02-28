@@ -25,6 +25,12 @@ export default {
       default: () => '',
     },
   },
+  data() {
+    return {
+      errorMessage: '',
+      user: undefined,
+    };
+  },
   async created() {
     this.user = await getUserInfo();
   },
