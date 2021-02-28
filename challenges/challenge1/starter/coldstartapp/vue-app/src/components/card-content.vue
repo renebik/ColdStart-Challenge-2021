@@ -36,7 +36,7 @@ export default {
     this.user = await getUserInfo();
   },
   methods: {
-    ...mapActions('catalog', ['postOrderAction']),
+    ...mapActions('orders', ['postOrderAction']),
     async saveOrder() {
       this.errorMessage = undefined;
       try {
