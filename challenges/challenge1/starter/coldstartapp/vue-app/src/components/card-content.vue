@@ -35,7 +35,7 @@ export default {
   async created() {
     this.user = await getUserInfo();
   },
-methods: {
+  methods: {
     ...mapActions('catalog', ['postOrderAction']),
     async saveOrder() {
       this.errorMessage = undefined;
@@ -45,7 +45,8 @@ methods: {
         this.errorMessage = 'Unauthorized';
       }
     },
-  },};
+  },
+};
 </script>
 
 <template>
