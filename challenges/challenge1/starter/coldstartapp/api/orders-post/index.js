@@ -1,5 +1,6 @@
 const { getUser } = require('../shared/user-utils');
-const { QueueClient, QueueServiceClient } = require("@azure/storage-queue");
+const { config } = require('../shared/config');
+const { QueueServiceClient } = require("@azure/storage-queue");
 
 module.exports = async function (context, req) {
   // Get the user details from the request
@@ -10,8 +11,9 @@ module.exports = async function (context, req) {
   // TODO: add the pre-order JSON document in a queue
   // Retrieve the connection from an environment
 // variable called AZURE_STORAGE_CONNECTION_STRING
-const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
-
+const connectionString = config.azure_storage_connectionstring;
+console.log("connectionString: ", connectionString);
+context.log("AzureWebJobsStorage: " + process.env["AzureWebJobsStorage"]);
 // Create a unique name for the queue
 const queueName = "myqueue-" + Date.now().toString();
 
