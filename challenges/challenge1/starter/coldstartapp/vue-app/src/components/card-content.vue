@@ -10,8 +10,8 @@ export default {
   },
   props: {
     id: {
-      type: String,
-      default: () => '',
+      type: Number,
+      default: () => -1,
     },
     name: {
       type: String,
@@ -37,7 +37,7 @@ export default {
   },
   methods: {
     ...mapActions('orders', ['postOrderAction']),
-    async saveOrder() {
+    async orderItem() {
       this.errorMessage = undefined;
       try {
         await this.postOrderAction(this.id);
@@ -61,8 +61,8 @@ export default {
       </div>
       <p class="description">{{ description }}</p>
     </div>
-    <div class="buttons" v-if="user">
-      <ButtonFooter v-if="user" @clicked="saveOrder" label="Order item" />
+    <div class="buttons" >
+      <ButtonFooter @clicked="orderItem" label="Order item" />
     </div>
   </div>
 </template>
