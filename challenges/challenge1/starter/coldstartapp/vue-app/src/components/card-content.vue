@@ -61,8 +61,8 @@ export default {
       </div>
       <p class="description">{{ description }}</p>
     </div>
-    <div class="buttons" >
-      <ButtonFooter @clicked="orderItem" label="Order item" />
+    <div class="buttons" v-if="user">
+      <ButtonFooter v-if="user" @clicked="orderItem" label="Order item" />
     </div>
   </div>
 </template>
