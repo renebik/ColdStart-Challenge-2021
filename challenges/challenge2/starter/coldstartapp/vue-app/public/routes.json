@@ -1,0 +1,32 @@
+{
+  "routes": [
+    {
+      "route": "/api/catalog"
+    },
+    {
+      "route": "/api/order",
+      "allowedRoles": ["authenticated"]
+    },
+    {
+      "route": "/login",
+      "serve": "/.auth/login/github",
+      "allowedRoles": ["anonymous"]
+    },
+    {
+      "route": "/logout",
+      "serve": "/.auth/logout",
+      "allowedRoles": ["authenticated"]
+    },
+    {
+      "route": "/*",
+      "serve": "/index.html",
+      "statusCode": 200
+    }
+  ],
+  "platformErrorOverrides": [
+    {
+      "errorType": "NotFound",
+      "serve": "/404.html"
+    }
+  ]
+}
