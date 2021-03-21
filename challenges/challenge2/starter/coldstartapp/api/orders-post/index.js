@@ -2,6 +2,7 @@ const { getUser } = require('../shared/user-utils');
 const { config } = require('../shared/config');
 const { QueueServiceClient } = require("@azure/storage-queue");
 const { v4: uuidv4 } = require('uuid');
+const order = require('../shared/save-order');
 
 module.exports = async function (context, req) {
   // Get the user details from the request
@@ -14,6 +15,10 @@ module.exports = async function (context, req) {
     User: user.userDetails,
     DateTime: new Date().toJSON()
   }
+  
+  const orderId = await order.saveOrder(preorder);
+
+  
   // TODO: add the pre-order JSON document in a queue
   // Retrieve the connection from an environment
   // variable called AZURE_STORAGE_CONNECTION_STRING
@@ -30,9 +35,9 @@ module.exports = async function (context, req) {
   const queueClient = queueServiceClient.getQueueClient(queueName);
 
   // Create the queue
-  await queueClient.createIfNotExists();
+//  await queueClient.createIfNotExists();
   
   // Add a message to the queue
-  await queueClient.sendMessage(JSON.stringify(preorder));
-  context.res.status(201);
+//  await queueClient.sendMessage(JSON.stringify(preorder));
+  context.res.status(201).send(orderId);
 };
