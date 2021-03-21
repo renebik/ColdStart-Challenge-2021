@@ -1,6 +1,6 @@
 //const fs = require('fs').promises;
-var { Connection } = require("tedious").Connection;
-var { Request } = require("tedious").Request;
+var { Connection } = require("tedious");
+var { Request } = require("tedious");
 const { config } = require('./config');
 
 const dbconfig = {  
@@ -21,23 +21,24 @@ const dbconfig = {
 
 async function getCatalog() {
   return new Promise((resolve, reject) => {
-    var result = "";    
+    var catalog = [];    
 
-    var connection = new Connection(dbconfig);
+    const connection = new Connection(dbconfig);
 
-    var request = new Request(`SELECT * FROM [dbo].[Icecreams]`, (err) => {
+    const request = new Request(`SELECT * FROM [dbo].[Icecreams]`, (err) => {
         if (err) {
             reject(err);
         } else {
-            if ((result == "" || result == null || result == "null")) result = "[]";  
-            resolve(result);
+            resolve(catalog);
         }       
     });    
 
     request.on('row', columns => {
+        var item={}
         columns.forEach(column => {
-            result += column.value;                
+            item[column.metadata.colName] = column.value;
         });
+        catalog.push(item);                
     });
 
     connection.on('connect', err => {
@@ -50,11 +51,11 @@ async function getCatalog() {
     });   
 
     connection.connect(); 
-  })
+  });
 //  console.log('using static data.');
 //  var stringData = await fs.readFile('./shared/catalog.json', 'utf8');
 // const data = JSON.parse(stringData);  
 //  return data.icecreams;
-};
+}
 
 module.exports = { getCatalog };
