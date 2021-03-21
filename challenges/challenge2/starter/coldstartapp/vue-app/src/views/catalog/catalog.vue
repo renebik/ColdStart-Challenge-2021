@@ -30,7 +30,7 @@ export default {
       try {
         await this.getCatalogAction();
       } catch (error) {
-        this.errorMessage = 'Unauthorized';
+        this.errorMessage = error.response.data;//'Unauthorized';
       }
     },
   },
