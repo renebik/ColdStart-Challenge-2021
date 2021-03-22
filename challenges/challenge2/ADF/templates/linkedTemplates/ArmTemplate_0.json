@@ -1,0 +1,413 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "factoryName": {
+            "type": "string",
+            "metadata": "Data Factory name",
+            "defaultValue": "renebik-ColdStart-adf"
+        },
+        "AzureSqlDatabase_connectionString": {
+            "type": "secureString",
+            "metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase'"
+        },
+        "coldstartBlobsotorage_connectionString": {
+            "type": "secureString",
+            "metadata": "Secure string for 'connectionString' of 'coldstartBlobsotorage'"
+        }
+    },
+    "variables": {
+        "factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('factoryName'), '/AzureSqlDatabase')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureSqlDatabase",
+                "typeProperties": {
+                    "connectionString": "[parameters('AzureSqlDatabase_connectionString')]"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/coldstartBlobsotorage')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureBlobStorage",
+                "typeProperties": {
+                    "connectionString": "[parameters('coldstartBlobsotorage_connectionString')]"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/HistoricalOrders')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "coldstartBlobsotorage",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "DelimitedText",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "fileName": "coldstart-orders-historical.csv",
+                        "container": "historicalorders"
+                    },
+                    "columnDelimiter": ",",
+                    "escapeChar": "\\",
+                    "firstRowAsHeader": true,
+                    "quoteChar": "\""
+                },
+                "schema": [
+                    {
+                        "name": "User",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Date",
+                        "type": "String"
+                    },
+                    {
+                        "name": "Id",
+                        "type": "String"
+                    },
+                    {
+                        "name": "IcecreamId",
+                        "type": "String"
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/coldstartBlobsotorage')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/OrdersTable')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "AzureSqlDatabase",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [
+                    {
+                        "name": "Id",
+                        "type": "uniqueidentifier"
+                    },
+                    {
+                        "name": "User",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "Date",
+                        "type": "datetime",
+                        "precision": 23,
+                        "scale": 3
+                    },
+                    {
+                        "name": "IcecreamId",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "Status",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "DriverId",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "FullAddress",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "LastPosition",
+                        "type": "nvarchar"
+                    }
+                ],
+                "typeProperties": {
+                    "schema": "dbo",
+                    "table": "Orders"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/IceCreamsData')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "coldstartBlobsotorage",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "Json",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobStorageLocation",
+                        "fileName": "catalog.json",
+                        "container": "icecreams"
+                    }
+                },
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "icecreams": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "Id": {
+                                        "type": "integer"
+                                    },
+                                    "Name": {
+                                        "type": "string"
+                                    },
+                                    "Description": {
+                                        "type": "string"
+                                    },
+                                    "ImageUrl": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/coldstartBlobsotorage')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/IceCreamsTable')]",
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "linkedServiceName": {
+                    "referenceName": "AzureSqlDatabase",
+                    "type": "LinkedServiceReference"
+                },
+                "annotations": [],
+                "type": "AzureSqlTable",
+                "schema": [
+                    {
+                        "name": "Id",
+                        "type": "int",
+                        "precision": 10
+                    },
+                    {
+                        "name": "Name",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "Description",
+                        "type": "nvarchar"
+                    },
+                    {
+                        "name": "ImageUrl",
+                        "type": "nvarchar"
+                    }
+                ],
+                "typeProperties": {
+                    "schema": "dbo",
+                    "table": "Icecreams"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/ImportHistoricalOrders')]",
+            "type": "Microsoft.DataFactory/factories/dataflows",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "type": "MappingDataFlow",
+                "typeProperties": {
+                    "sources": [
+                        {
+                            "dataset": {
+                                "referenceName": "HistoricalOrders",
+                                "type": "DatasetReference"
+                            },
+                            "name": "historicalorders"
+                        }
+                    ],
+                    "sinks": [
+                        {
+                            "dataset": {
+                                "referenceName": "OrdersTable",
+                                "type": "DatasetReference"
+                            },
+                            "name": "orders"
+                        }
+                    ],
+                    "transformations": [],
+                    "script": "source(output(\n\t\tUser as string,\n\t\tDate as timestamp 'yyyy-MM-dd HH:mm:ss',\n\t\tId as string,\n\t\tIcecreamId as short\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> historicalorders\nhistoricalorders sink(input(\n\t\tId as string,\n\t\tUser as string,\n\t\tDate as timestamp,\n\t\tIcecreamId as integer,\n\t\tStatus as string,\n\t\tDriverId as integer,\n\t\tFullAddress as string,\n\t\tLastPosition as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> orders"
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/datasets/HistoricalOrders')]",
+                "[concat(variables('factoryId'), '/datasets/OrdersTable')]"
+            ]
+        },
+        {
+            "name": "[concat(parameters('factoryName'), '/ImportHistoricalOrderData')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "ImportHistoricalOrderData",
+                        "type": "ExecuteDataFlow",
+                        "dependsOn": [
+                            {
+                                "activity": "Copy IceCreamData",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "7.00:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "dataflow": {
+                                "referenceName": "ImportHistoricalOrders",
+                                "type": "DataFlowReference",
+                                "parameters": {},
+                                "datasetParameters": {
+                                    "historicalorders": {},
+                                    "orders": {}
+                                }
+                            },
+                            "staging": {},
+                            "compute": {
+                                "coreCount": 8,
+                                "computeType": "General"
+                            },
+                            "traceLevel": "Fine"
+                        }
+                    },
+                    {
+                        "name": "Copy IceCreamData",
+                        "type": "Copy",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "7.00:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "source": {
+                                "type": "JsonSource",
+                                "storeSettings": {
+                                    "type": "AzureBlobStorageReadSettings",
+                                    "recursive": false,
+                                    "enablePartitionDiscovery": false
+                                },
+                                "formatSettings": {
+                                    "type": "JsonReadSettings"
+                                }
+                            },
+                            "sink": {
+                                "type": "AzureSqlSink"
+                            },
+                            "enableStaging": false,
+                            "translator": {
+                                "type": "TabularTranslator",
+                                "mappings": [
+                                    {
+                                        "source": {
+                                            "path": "[['Id']"
+                                        },
+                                        "sink": {
+                                            "name": "Id",
+                                            "type": "Int32"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "path": "[['Name']"
+                                        },
+                                        "sink": {
+                                            "name": "Name",
+                                            "type": "String"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "path": "[['Description']"
+                                        },
+                                        "sink": {
+                                            "name": "Description",
+                                            "type": "String"
+                                        }
+                                    },
+                                    {
+                                        "source": {
+                                            "path": "[['ImageUrl']"
+                                        },
+                                        "sink": {
+                                            "name": "ImageUrl",
+                                            "type": "String"
+                                        }
+                                    }
+                                ],
+                                "collectionReference": "$['icecreams']"
+                            }
+                        },
+                        "inputs": [
+                            {
+                                "referenceName": "IceCreamsData",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ],
+                        "outputs": [
+                            {
+                                "referenceName": "IceCreamsTable",
+                                "type": "DatasetReference",
+                                "parameters": {}
+                            }
+                        ]
+                    }
+                ],
+                "annotations": [],
+                "lastPublishTime": "2021-03-09T19:14:47Z"
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/dataflows/ImportHistoricalOrders')]",
+                "[concat(variables('factoryId'), '/datasets/IceCreamsData')]",
+                "[concat(variables('factoryId'), '/datasets/IceCreamsTable')]"
+            ]
+        }
+    ]
+}
