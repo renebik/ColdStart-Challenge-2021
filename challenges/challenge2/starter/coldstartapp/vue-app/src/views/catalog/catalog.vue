@@ -11,7 +11,6 @@ export default {
       message: '',
       routePath: '/catalog',
       title: 'Our Ice Creams',
-      recommendedtitle: 'Our recommendations',
     };
   },
   components: {
@@ -23,8 +22,9 @@ export default {
     await this.getRecommendations();
   },
   computed: {
-    ...mapGetters('catalog', { catalog: 'catalog', recommendation: 'recommendation' }),
-    recommendations() {
+    ...mapGetters('catalog', { catalog: 'catalog' }),
+    ...mapGetters('recommendations', { recommendations: 'recommendations' }),
+    recommendationresult() {
       return this.catalog.filter(
         (item) => (
           this.recommendations.some((r) => r.Id === item.Id)
@@ -33,20 +33,23 @@ export default {
     },
   },
   methods: {
-    ...mapActions('catalog', ['getCatalogAction', 'getRecommendationAction']),
+    ...mapActions('catalog', ['getCatalogAction']),
+    ...mapActions('recommendations', ['getRecommendationsAction']),
     async getCatalog() {
       this.errorMessage = undefined;
       try {
         await this.getCatalogAction();
       } catch (error) {
+        debugger;
         this.errorMessage = 'Unauthorized';
       }
     },
     async getRecommendations() {
       this.errorMessage = undefined;
       try {
-        await this.getRecommendationAction();
+        await this.getRecommendationsAction();
       } catch (error) {
+        debugger;
         this.errorMessage = 'Unauthorized';
       }
     },
@@ -56,12 +59,6 @@ export default {
 
 <template>
   <div class="content-container">
-    <ListHeader :title="recommendedtitle" @refresh="getRecommendations" :routePath="routePath">
-    </ListHeader>
-      <CatalogList
-          :icecreams="recommendations"
-          :errorMessage="errorMessage"
-       ></CatalogList>
     <ListHeader :title="title" @refresh="getCatalog" :routePath="routePath">
     </ListHeader>
     <div class="columns is-multiline is-variable">
