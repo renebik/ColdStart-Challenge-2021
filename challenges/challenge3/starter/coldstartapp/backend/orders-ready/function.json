@@ -1,0 +1,20 @@
+{
+  "bindings": [
+    {
+      "schedule": "*/5 * * * * *",
+      "name": "myTimer",
+      "type": "timerTrigger",
+      "direction": "in"
+    },
+    {
+      "name": "acceptedOrderDocuments",
+      "type": "cosmosDB",
+      "direction": "in",
+      "databaseName": "%COSMOSDB_DATABASE%",
+      "collectionName": "%COSMOSDB_CONTAINER%",
+      "partitionKey": "/user",
+      "sqlQuery": "SELECT * from c where c.status = 'Accepted'",
+      "connectionStringSetting": "COSMOSDB_CONNECTIONSTRING"
+    }
+  ]
+}
