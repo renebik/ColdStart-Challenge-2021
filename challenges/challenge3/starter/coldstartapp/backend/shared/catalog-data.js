@@ -11,4 +11,14 @@ async function getCatalog() {
   return result.recordset;
 }
 
-module.exports = { getCatalog };
+async function getCatalogById(itemId) {
+  console.log('using database ');
+
+  let pool = await mssql.connect(sqlConfig);
+  let result = await pool.request()
+    .query(`SELECT * FROM dbo.Icecreams WHERE Id = ${itemId}`);
+
+  return result.recordset;
+}
+
+module.exports = { getCatalog, getCatalogById };

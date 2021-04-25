@@ -25,7 +25,7 @@ module.exports = async function (context, myQueueItem) {
           console.log('BODY: ' + chunk);
           const json = JSON.parse(chunk);
           console.log(json);
-          const tmp = json.resourceSets[0].resources[0].geocodePoints[0].coordinates;
+          const tmp = json.resourceSets[0].resources[0].geocodePoints[0].coordinates.toString();
           console.log(tmp);
           document.deliveryPosition = tmp;
         });
