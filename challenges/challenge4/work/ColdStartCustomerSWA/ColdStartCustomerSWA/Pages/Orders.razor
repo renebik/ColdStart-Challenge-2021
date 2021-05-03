@@ -1,0 +1,51 @@
+﻿@page "/orders/{orderId}"
+@attribute [Authorize]
+@inject OrdersClient OrdersClient
+@using ColdStartCustomerSWA.ComponentsLibrary
+@using ColdStartCustomerSWA.Shared
+
+<div class="main">
+    <div class="track-order">
+        <div class="track-order-title">
+            <h2>
+                Order placed @order.Date.ToLongDateString()
+            </h2>
+        </div>
+        <div class="track-order-body">
+            <Map Zoom="13" Markers="Markers" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string OrderId { get; set; }
+
+    Order order = new Order();
+
+    List<Marker> Markers = new List<Marker>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        order = await OrdersClient.GetOrder(Guid.Parse(OrderId.ToUpper()));
+
+        Marker deliveryMarker = new Marker();
+        deliveryMarker.ShowPopup = true;
+        deliveryMarker.Description = "You";
+        deliveryMarker.X = Convert.ToDouble(order.DeliveryPosition.Split(',')[1]);
+        deliveryMarker.Y = Convert.ToDouble(order.DeliveryPosition.Split(',')[0]);
+
+        Markers.Add(deliveryMarker);
+
+        if (order.Status == "Delivering")
+        {
+            Marker driverMarker = new Marker();
+            driverMarker.Description = "Your order";
+            driverMarker.X = Convert.ToDouble(order.LastPosition.Split(',')[1]);
+            driverMarker.Y = Convert.ToDouble(order.LastPosition.Split(',')[0]);
+
+            Markers.Add(driverMarker);
+
+        }
+    }
+
+}
